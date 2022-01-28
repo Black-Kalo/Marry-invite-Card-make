@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>marry card</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script src="https://use.fontawesome.com/6364f396e2.js"></script>
+    <link href="https://fonts.loli.net/css?family=Noto+Serif+TC|Long+Cang|Kaushan+Script|Ma+Shan+Zheng|ZCOOL+XiaoWei|Noto+Sans+SC&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="js/qr.js"></script>
+    <script src="js/common.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>marry invite card maker</h1>
+        </header>
+        <article class="content">
+            <section class="preview">
+                <canvas ref="cvs" id="cvs" :style="{'max-width': size + 'px'}"></canvas>
+            </section>
+            <section class="setting">
+                <div class="others">
+                    <p>
+                        <label class="form-label" style="width: auto;" for="size-content">Size</label>
+                        <input type="number" ref="size" id="size-content" class="form-number" :value="size" @change="size=$refs['size'].value" @keyup.13="size=$refs['size'].value">                        
+                        <button class="btn" title="Download All Picture from Variable" @click="downloadAll"><i class="fa fa-download" aria-hidden="true"></i></button>
+                        <button class="btn" @click="$refs['cfg'].click()" title="Import Config"><i class="fa fa-sign-in" aria-hidden="true"></i></button>
+                        <button class="btn" title="Export Config" @click="exportConfig"><i class="fa fa-sign-out" aria-hidden="true"></i></button>
+                        <button class="btn refresh-btn" title="Refresh Image" @click="refresh"><i class="fa fa-refresh" aria-hidden="true"></i></button class="btn" title="Export Config">
+                        <button class="btn" title="Github" @click="window.open('https://github.com/Black-Kalo')"><i class="fa fa-github" aria-hidden="true"></i></button>
+                        <button class="btn big-size" title="Prev Template" @click="loadConfigIndex(template - 1)"><i class="fa fa-caret-left" aria-hidden="true"></i></button>
+                        <button class="btn big-size" title="Next Template" @click="loadConfigIndex(template + 1)"><i class="fa fa-caret-right" aria-hidden="true"></i></button>
+                        <input type="file" style="width: 30%" ref="cfg" @change="changeConfig" v-show="false">
+                    </p>
+                </div>
+                <div class="tab">
+                    <ul class="tab-list">
+                        <li class="tab-item" :class="{current: currentTab == 0}" @click="currentTab=0">Texts({{texts.length}})</li>
+                        <li class="tab-item" :class="{current: currentTab == 1}" @click="currentTab=1">Image({{images.length}})</li>
+                        <li class="tab-item" :class="{current: currentTab == 2}" @click="currentTab=2">QRCodes({{qrCodes.length}})</li>
+                        <li class="tab-item" :class="{current: currentTab == 3}" @click="currentTab=3">Variable({{(variables[0] || []).length}}, {{variables.length}})</li>
+                    </ul>
+                </div>
+                <div class="texts" v-show="currentTab == 0">
+                    <p>
+                        <ul class="draw-list">
+                            <li class="draw-item" v-for="(t, i) in texts" :class="{current: currentText == i}" @click="currentText = i">
+                                {{t.content}}&nbsp;&nbsp;<i class="fa fa-close" @click.stop="removeText(i)"></i>
+                            </li>
+                            <li class="draw-item" @click="addText">
+                                <i class="fa fa-plus" aria-hidden="true"></i>
+                            </li>
+                        </ul>
+                    </p>
+                    <form class="form" v-if="text">
+                        <p>
+                            <label class="form-label" for="text-content">Content</label>
+                            <input type="text" id="text-content" v-model="text.content">
+                        </p>
+                        <p>
+                            <label class="form-label" for="text-font">Font</label>
+                            <input type="text" id="text-font" v-model="text.font"> 
+                            <input type="number" id="text-size" v-model="text.size">
+                            <span class="font-style"><i :class="{current: text.bold}" class="fa fa-bold" aria-hidden="true" @click="text.bold = !text.bold"></i></span>
+                            <span class="font-style"><i :class="{current: text.italic}" class="fa fa-italic" aria-hidden="true" @click="text.italic = !text.italic"></i></span class="font-style">
+                        </p>
+                        <p>
+                            <label class="form-label top-label" for="text-coord-x">Location</label>
+                            <span class="form-block">
+                                <span class="text-align">
+                                    <i :class="{current: text.align == 'left'}" class="fa fa-align-left" aria-hidden="true" @click="text.align = 'left'"></i>
+                                    <i :class="{current: text.align == 'center'}"class="fa fa-align-center" aria-hidden="true" @click="text.align = 'center'"></i>
+                                    <i :class="{current: text.align == 'right'}"class="fa fa-align-right" aria-hidden="true" @click="text.align = 'right'"></i>
+                                </span>
+                                <label for="text-coord-x">X</label>
+                                <input type="range" v-model="text.coord.x" min="0" :max="cvsWidth">
+                                <input type="number" class="form-number" id="text-coord-x" v-model="text.coord.x">
+                                <br>
+                                <label for="text-coord-y">Y</label>
+                                <input type="range" v-model="text.coord.y" min="0" :max="cvsHeight">
+                                <input type="number" class="form-number" id="text-coord-y" v-model="text.coord.y">
+                            </span>
+                        </p>
+                        <p>
+                            <label class="form-label" for="text-color">Color</label>
+                            <input ref="text-color" v-show="false" type="color" v-model="text.color">
+                            <input type="text" id="text-color" v-model="text.color">
+                            <span class="form-color" :style="{ background: text.color }" @click="$refs['text-color'].click()"></span>
+                        </p>
+                        <p>
+                            <label class="form-label" for="text-variable">Variable</label>
+                            <span style="display: inline-block;">
+                                <input type="checkbox" id="text-variable" v-model="text.variable">    
+                            </span>
+                        </p>
+                    </form>
+                </div>
+                <div class="images" v-show="currentTab == 1">
+                    <p>
+                        <ul class="draw-list">
+                            <li class="draw-item" v-for="(t, i) in images" :class="{current: currentImage == i}" @click="currentImage = i">
+                                <img v-if="!t.variable" :alt="t.content" :title="t.content" :src="t.content">
+                                <span v-if="t.variable">{{t.content}}</span>
+                                <i class="fa fa-close" @click.stop="removeImage(i)"></i>
+                            </li>
+                            <li class="draw-item" @click="addImage">
+                                <i class="fa fa-plus" aria-hidden="true"></i>
+                            </li>
+                        </ul>
+                    </p>
+                    <form class="form" v-if="image">
+                        <p>
+                            <label class="form-label top-label" for="image-content">Content</label>
+                            <span class="form-block">
+                                <img :src="imageContent" alt="" style="width: 60%;max-width: 600px;">
+                                <br>
+                                <input type="text" id="image-content" v-model="image.content">
+                                <button class="btn" @click.prevent="uploadImg" title="Upload a new Picture"><i class="fa fa-picture-o" aria-hidden="true"></i></button>
+                                <input type="file" ref="img" @change="changeImg" v-show="false">
+                            </span class="form-block">
+                        </p>
+                        <p>
+                            <label class="form-label top-label" for="text-font">Size</label>
+                            <span class="form-block">
+                                <label for="image-size-w">Width</label>
+                                <input type="range" v-model="image.size.width" min="0" :max="size">
+                                <input :type="image.size.width > 0 ? 'number' : 'text'" class="form-number" id="image-size-w" v-model="imageWidth">
+                                <br>
+                                <label for="image-size-h">Height</label>
+                                <input type="range" v-model="image.size.height" min="0" :max="cvsHeight * 10">
+                                <input :type="image.size.height > 0 ? 'number' : 'text'" class="form-number" id="image-size-h" v-model="imageHeight">
+                            </span>                        
+                        </p>
+                        <p>
+                            <label class="form-label top-label" for="image-coord-x">Location</label>
+                            <span class="form-block">
+                                <label for="image-coord-x">X</label>
+                                <input type="range" v-model="image.coord.x" min="0" :max="size">
+                                <input type="number" class="form-number" id="image-coord-x" v-model="image.coord.x">
+                                <br>
+                                <label for="image-coord-y">Y</label>
+                                <input type="range" v-model="image.coord.y" min="0" :max="cvsHeight">
+                                <input type="number" class="form-number" id="image-coord-y" v-model="image.coord.y">
+                            </span>
+                        </p>
+                        <p>
+                            <label class="form-label" for="image-background">Background</label>
+                            <input ref="image-color" v-show="false" type="color" v-model="image.background">
+                            <input type="text" id="image-background" v-model="image.background">
+                            <span class="form-color" :style="{ background: image.background }" @click="$refs['image-color'].click()"></span>
+                        </p>
+                        <p>
+                            <label class="form-label" for="image-resize">Resize Canvas</label>
+                            <span style="display: inline-block;">
+                                <input type="checkbox" id="image-resize" v-model="image.resize">    
+                            </span>
+                        </p>
+                        <p>
+                            <label class="form-label" for="image-variable">Variable</label>
+                            <span style="display: inline-block;">
+                                <input type="checkbox" id="image-variable" v-model="image.variable">    
+                            </span>
+                        </p>
+                    </form>
+                </div>
+                <div class="qrs" v-show="currentTab == 2">
+                    <p>
+                        <ul class="draw-list">
+                            <li class="draw-item" v-for="(q, i) in qrCodes" :class="{current: currentQr == i}" @click="currentQr = i">
+                                {{q.content}}&nbsp;&nbsp;<i class="fa fa-close" @click.stop="removeQr(i)"></i>
+                            </li>
+                            <li class="draw-item" @click="addQr">
+                                <i class="fa fa-plus" aria-hidden="true"></i>
+                            </li>
+                        </ul>
+                    </p>
+                    <form class="form" v-if="qrCode">
+                        <p>
+                            <label class="form-label" for="qr-content">Content</label>
+                            <input type="text" id="qr-content" v-model="qrCode.content" style="width: 29em">
+                        </p>
+                        <p>
+                            <label class="form-label" for="qr-font">Size</label>
+                            <input type="number" id="qr-size" v-model="qrCode.size">
+                        </p>
+                        <p>
+                            <label class="form-label top-label" for="qr-coord-x">Location</label>
+                            <span class="form-block">
+                                <label for="qr-coord-x">X</label>
+                                <input type="range" v-model="qrCode.coord.x" min="0" :max="cvsWidth">
+                                <input type="number" class="form-number" id="qr-coord-x" v-model="qrCode.coord.x">
+                                <br>
+                                <label for="qr-coord-y">Y</label>
+                                <input type="range" v-model="qrCode.coord.y" min="0" :max="cvsHeight">
+                                <input type="number" class="form-number" id="qr-coord-y" v-model="qrCode.coord.y">
+                            </span>
+                        </p>
+                        <p>
+                            <label class="form-label top-label" for="qr-color-fg">Color</label>
+                            <span class="form-block">
+                                <input ref="qr-color-fg" v-show="false" type="color" v-model="qrCode.color.foreground">
+                                <input type="text" id="qr-color-fg" v-model="qrCode.color.foreground">
+                                <span class="form-color" :style="{ background: qrCode.color.foreground }" @click="$refs['qr-color-fg'].click()"></span>
+                                <br>
+                                <input ref="qr-color-bg" v-show="false" type="color" v-model="qrCode.color.background">
+                                <input type="text" id="qr-color-bg" v-model="qrCode.color.background">
+                                <span class="form-color" :style="{ background: qrCode.color.background }" @click="$refs['qr-color-bg'].click()"></span>
+                            </span>
+                        </p>
+                        <p>
+                            <label class="form-label" for="qr-variable">Variable</label>
+                            <span style="display: inline-block;">
+                                <input type="checkbox" id="qr-variable" v-model="qrCode.variable">    
+                            </span>
+                        </p>
+                        <p>
+                            <label class="form-label">Result</label>
+                            <span>{{qrResult}}</span>
+                        </p>
+                    </form>
+                </div>
+                <div class="variables" v-show="currentTab == 3">
+                    <p>
+                        <textarea style="width: 100%;" cols="30" rows="50" v-model="vars"></textarea>
+                    </p>
+                </div>
+            </section>
+        </article>
+        <footer>
+            <p style="display: none;"><script type="text/javascript" src="https://s95.cnzz.com/z_stat.php?id=1261530627&web_id=1261530627"></script></p>
+        </footer>
+    </div>
+    <script src="js/do.js"></script>
+</body>
+</html>
+
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="免費製作結婚邀請卡">
+  <meta name="keywords" content="HTML, CSS, JavaScript">
+  <meta name="author" content="John Doe">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<style type="text/css">* {cursor: url(https://ani.cursors-4u.net/nature/nat-11/nat1045.cur), auto !important;}</style><a href="https://www.cursors-4u.com/cursor/2016/06/15/orange-angel-wing-heart.html" target="_blank" title="Orange Angel Wing Heart"><img src="https://cur.cursors-4u.net/cursor.png" border="0" alt="Orange Angel Wing Heart" style="position:absolute; top: 0px; right: 0px;" /></a>

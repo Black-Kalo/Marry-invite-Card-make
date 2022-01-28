@@ -1,0 +1,277 @@
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+*, :after, :before {
+    box-sizing: border-box;
+}
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+body {
+    font-family: "Noto Sans SC", "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #000;
+    background-color: #fef5e4;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+article, aside, blockquote, body, 
+button, dd, details, div, dl, dt, 
+fieldset, figcaption, figure, footer, form, 
+h1, h2, h3, h4, h5, h6, header, hgroup, hr, 
+input, legend, li, menu, nav, ol, p, section, td, textarea, th, ul {
+    margin: 0;
+    padding: 0;
+}
+header {
+    font-family: "Kaushan Script", "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    text-align: center;
+    margin: .5em 0;
+    font-size: 3em;
+    color: #F44336;
+}
+
+input {
+    padding: .5em;
+    vertical-align: middle;
+}
+
+input[type=range] {
+    vertical-align: middle;
+    padding: 0;
+}
+
+input[type=color] {
+    border: 0;
+    width: 2em;
+    height: 2em;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+textarea {
+    padding: .5em;
+}
+
+:focus {
+    outline: none;
+}
+
+.content {
+    display: flex;
+    margin: auto;
+    max-width: 1200px;
+}
+
+.content>section{
+    flex: 1;
+}
+
+.preview {
+    padding: 0 1em;
+    text-align: center;
+}
+
+.preview canvas {
+    width: 100%;
+    box-shadow: 2px 2px 10px 5px #CCC;
+}
+
+.setting {
+    padding-left: 1.5em;
+}
+
+.refresh-btn:active {
+    -webkit-animation: fa-spin .4s infinite linear;
+    animation: fa-spin .4s infinite linear;
+}
+
+.tab-list {
+    border-top: 2px solid #000;
+    list-style: none;
+    padding: 0;
+}
+
+.tab-item {
+    display: inline-block;
+    font-size: 1.3em;
+    color: #CDCECF;
+    padding: 1em .5em;
+    cursor: pointer;
+    position: relative;
+    text-align: center;
+}
+
+.tab-item.current {
+    color: #795548;
+    font-weight: bold;
+}
+
+.tab-item.current::after {
+    content: "\f0d7";
+    font: normal normal normal 20px FontAwesome;
+    position: absolute;
+    bottom: 0;
+    color: inherit;
+    left: 50%;
+}
+
+.others {
+    margin: 1em 0;
+}
+
+.btn {
+    vertical-align: middle;
+    background: transparent;
+    border: 0;
+    border-radius: 5px;
+    color: #795548;
+    cursor: pointer;
+    font-size: 1.5em;
+    height: 2em;
+    margin: 0 .5em;
+}
+
+.draw-list {
+    list-style: none;
+    padding: 0;
+}
+
+.draw-item {
+    display: inline-block;
+    background: #fffefa;
+    color: #000;
+    padding: .3em 1em;
+    line-height: 2.5;
+    margin: .5em;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 1px 1px 3px #CCC;
+}
+
+.draw-item.current {
+    background: #867061;
+    color: #ECEDEF;
+}
+
+.form {
+    border-top: 1px dashed #000;
+    margin: .5em;
+    padding: .5em 0;
+}
+
+.form p {
+    margin: .6em 0;
+}
+
+.form-label {
+    display: inline-block;
+    width: 6.5em;
+    font-weight: bold;
+    line-height: 2em;
+    text-align: right;
+    padding: 0 .5em;
+    vertical-align: middle;
+}
+
+.images .draw-item>img {
+    max-width: 50px;
+}
+
+#text-size {
+    width: 4em;
+    text-align: center;
+}
+
+.top-label {
+    vertical-align: top;
+}
+
+.form-number {
+    width: 5em;
+    text-align: center; 
+}
+
+.text-align {
+    display: flex;
+    width: 100%;
+    vertical-align: middle;
+    height: 2em;
+}
+
+.text-align i {
+    color: #CDCECF;
+    flex: 1;
+    line-height: 2em;
+    cursor: pointer;
+}
+
+.text-align i.current {
+    color: #000;
+}
+
+.text-align i.fa-align-left {
+    text-align: left;
+}
+
+.text-align i.fa-align-center {
+    text-align: center;
+}
+
+.text-align i.fa-align-right {
+    text-align: right;
+}
+
+.form-block {
+    display: inline-block;
+    max-width: calc(100% - 7em);
+}
+
+.form-color {
+   display: inline-block;
+   width: 2em;
+   height: 2em;
+   border-radius: 50%;
+   vertical-align: middle;
+   cursor: pointer;
+   border: 1px solid #000;
+}
+
+.big-size {
+    font-size: 2em;
+}
+
+.font-style {
+    display: inline-block;
+    width: 1.5em;
+    text-align: center;
+    color: #CDCECF;
+    cursor: pointer;
+}
+.font-style i.current {
+    color: #000;
+}
+
+@media (max-width: 800px) {
+    header {
+        font-size: 2em;
+    }
+    .content {
+        display: block;
+    }
+    .content>section {
+        padding: .5em;
+    }
+     
+}
+
+@font-face {
+    font-family:"字体管家版宋";
+    src:url("../res/字体管家版宋2.woff2") format('woff2'),
+        url("../res/字体管家版宋2.woff") format('woff'),
+        url("../res/字体管家版宋.ttf") format('truetype');
+    font-weight:normal;
+    font-style:normal;
+}
